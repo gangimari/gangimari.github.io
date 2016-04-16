@@ -1,0 +1,137 @@
+<html>
+<head>
+<meta charset="UTF-8"> 
+<style>
+.notrans_webclap_balloon {
+	display:inline-block;
+	clear: both;
+	position: relative;
+	padding: 10px 20px;
+	margin: 5px;
+	width: auto;
+	border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	background-color: GreenYellow; /*バルーンの色はここと*/
+	vertical-align:top;
+}
+.notrans_webclap_balloon:before {
+	z-index: 1;
+	content: "";
+	position: absolute;
+	top: 10px;
+	width: 0;
+	height: 0;
+	border-top: 2px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 5px solid transparent;
+	border-right: 10px solid GreenYellow;	/*ここの2か所で設定する*/
+	left: -14px;
+}
+
+.notrans_wc {
+	display: inline-block;
+	padding: 0px 5px;
+	margin: 5px;
+	vertical-align:top;
+}
+</style>
+<script>
+// ------------------------設定項目----------------------------
+var webclap_URL = '';	// web拍手のURL
+
+var webclap_thxImage_URL = './test.png';	// お礼画像のURL（なければ未入力のまま）
+var webclap_thxImage_width = 240;	// お礼画像の横幅（px）
+var webclap_thxImage_height = 200;	// お礼画像の高さ（px）
+var webclap_thxText = 'お礼の文章がここに表示されます。<br>&lt;br&gt;タグで改行も可能です。';	// 拍手時のお礼文章（バルーンに表示、改行は<br>で指定）
+
+var webclap_isUseImage = 1;	// 拍手ボタンに画像を使用するか（使用する:1、使用しない:0）
+var webclap_Text = 'web拍手する';	// 拍手リンクのテキスト
+var webclap_Image_URL = './test.png';	//拍手ボタンの代わりに使う画像のURL
+var webclap_Image_URL_after = './test2.png';	// 拍手ボタンが押されたら画像を変えたい場合は、その画像のURL（ない場合は未入力のまま）
+var webclap_Image_width = 100;	// 拍手ボタン画像の横幅（px）
+var webclap_Image_height = 100;	// 拍手ボタン画像の高さ（px）
+
+var balloon_closetime = 0;	// 拍手を自動で閉じるまでの時間（秒）、0なら自動で閉じない（※未実装）
+// --------------------設定項目ここまで------------------------
+
+
+// ページの読み込み完了時に拍手の初期設定を行うため、イベントハンドラを登録する
+if( window.addEventListener ){window.addEventListener('load', generate_notrans_webclap, false);}
+else if( window.attachEvent ){window.attachEvent('onload', generate_notrans_webclap);}
+else{window.onload = generate_notrans_webclap;}
+
+// -----------------------拍手の初期設定を行う-----------------------
+function generate_notrans_webclap() {
+	var elements = document.getElementsByClassName("notrans_wc");
+	for(var i=0;elements.length>i;i++) {
+		var element = elements[i] ;
+		if(webclap_isUseImage == 0){	// 拍手ボタンにテキストを使用する
+			element.innerHTML = '<a href="javascript:void(0);" title="web拍手する" onClick="javascript:notrans_webclap_exec(this); false;">'+webclap_Text+'</a>';
+		}else{	// 拍手ボタンとして画像を使用する場合
+			element.innerHTML = '<a href="javascript:void(0);" onClick="javascript:notrans_webclap_exec(this); false;"><img src="'+webclap_Image_URL+'" title="web拍手する" style="max-width:' + webclap_Image_width + 'px; max-height:' + webclap_Image_height + '"></a>';
+		}
+	}
+}
+
+//-------------------拍手を実行する---------------------
+function notrans_webclap_exec(element) {
+// web拍手のページを読み込むiframeを生成
+var webclap_iframe = document.createElement("iframe");
+webclap_iframe.id="wc_iframe";
+// BODY のノードリストに登録する
+document.body.appendChild(webclap_iframe);
+webclap_iframe.src = webclap_URL;
+document.getElementById('wc_iframe').style.visibility = "hidden";
+document.body.removeChild(webclap_iframe);
+// 拍手ページの読み込み終了
+
+// 拍手後のバルーンを生成する
+var wc_id = element.parentNode.id;	// 押された拍手のIDを取得
+// 拍手されたら画像を変更する場合
+if(webclap_Image_URL_after) {
+	element.parentNode.innerHTML = '<a href="javascript:void(0);" onClick="javascript:notrans_webclap_exec(this); false;"><img src="'+webclap_Image_URL_after+'" title="web拍手する" style="max-width:' + webclap_Image_width + 'px; max-height:' + webclap_Image_height + '"></a>';
+}
+if(document.getElementById(wc_id + "balloon") != null){exit();}	// バルーンが二重に表示されないようにする
+var balloon_elm = document.createElement("div");	// バルーンを生成
+document.getElementById(wc_id).appendChild(balloon_elm);
+balloon_elm.className = "notrans_webclap_balloon";
+balloon_elm.id = wc_id + "balloon";
+balloon_elm.innerHTML = webclap_thxText;
+
+// バルーンを閉じるリンクと画像を表示する
+if(webclap_thxImage_URL) {
+	balloon_elm.innerHTML += '<br><div id="' + wc_id + '_thxImage"><a href="javascript:void(0);" onClick="javascript:disp_thxImage(this); false;">お礼画像を表示する</a></div>';
+}
+	balloon_elm.innerHTML += '<br><div><a href="javascript:void(0);" onClick="javascript:close_thxText('+wc_id+'); false;">バルーンを閉じる</a></div>';
+}
+// ------------------バルーンを閉じる-------------------
+function close_thxText(element) {
+	document.getElementById(element.id).removeChild(document.getElementById(element.id + "balloon"))
+	// 拍手される前の画像にもどす
+	if(webclap_Image_URL_after) {
+		document.getElementById(element.id).innerHTML = '<a href="javascript:void(0);" onClick="javascript:notrans_webclap_exec(this); false;"><img src="'+webclap_Image_URL+'" title="拍手する" style="max-width:' + webclap_Image_width + 'px; max-height:' + webclap_Image_height + '"></a>';
+	}
+}
+// -------------------お礼画像を表示する（お礼画像をクリックしたら新しいウィンドウに元画像を表示する）-----------------
+function disp_thxImage(element) {
+	element.parentNode.innerHTML = '<a href="'+ webclap_thxImage_URL +'" target="_blank"><img src="'+ webclap_thxImage_URL +'" style="max-width:' + webclap_thxImage_width + 'px; max-height:' + webclap_thxImage_height + ';padding:10px;"></a>'
+}
+</script>
+</head>
+<body>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris mattis, lectus quis vulputate tempor, libero justo tempor lorem, vitae viverra diam eros nec velit. Nulla sed diam viverra, sodales diam at, viverra enim. Donec ullamcorper maximus ipsum sit amet tempus. Aliquam ut velit vel neque scelerisque consequat id et ligula. Etiam vitae ipsum at leo vehicula congue vel nec lorem. Nunc at egestas metus. Integer et eros vitae tortor congue maximus non ut risus. Aenean quis imperdiet arcu, nec efficitur ante.
+
+In hac habitasse platea dictumst. Phasellus eget tortor lacinia, tempor velit quis, mattis nisl. Morbi leo dolor, aliquet sit amet feugiat id, pretium ut quam. Ut suscipit varius lectus ut pharetra. Curabitur dolor odio, malesuada vel mauris quis, blandit rutrum purus. Proin ac bibendum odio. Etiam mauris libero, gravida et facilisis ut, euismod non risus. Praesent vehicula sem eu risus vestibulum porta. Suspendisse eu pretium nulla, ac semper ligula. Aliquam laoreet blandit erat, malesuada laoreet quam convallis id. Morbi vestibulum bibendum risus, vitae rutrum enim sagittis ut.
+
+Maecenas aliquam laoreet egestas. Suspendisse feugiat enim sollicitudin, varius sapien vitae, pretium velit. Etiam dignissim egestas quam, sed tincidunt purus malesuada eget. Praesent quis orci vitae lacus semper rhoncus. Proin at lorem purus. Cras facilisis rhoncus finibus. Aliquam in elit mi. Quisque mi lorem, hendrerit ullamcorper ex nec, posuere semper ex.
+
+Proin varius eros et metus porttitor auctor. Suspendisse vestibulum tempus ligula. Suspendisse potenti. Nullam non sapien ac tellus ultrices lobortis id eu eros. Donec libero lacus, volutpat vitae tellus et, commodo mollis ante. Cras laoreet pretium urna, ac lobortis mauris pellentesque at. Nam vel libero orci. Quisque molestie condimentum mi eget vestibulum. Sed eu lectus dictum, accumsan felis id, facilisis elit. Donec posuere blandit fringilla.
+
+Maecenas nec nulla eu ipsum facilisis egestas. Maecenas at luctus dui, a condimentum tortor. In vulputate quam vitae rutrum auctor. Curabitur felis risus, scelerisque vitae felis a, sollicitudin volutpat dolor. In hac habitasse platea dictumst. Suspendisse vitae viverra ante, vel euismod quam. Nam eget purus sem. Donec et pretium sapien.</p>
+
+<div class="notrans_wc" id="hoge_1"></div>
+<div class="notrans_wc" id="wc_test_2"></div>
+
+</body>
+</html>
