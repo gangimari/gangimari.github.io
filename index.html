@@ -49,8 +49,8 @@ var webclap_isUseImage = 1;	// 拍手ボタンに画像を使用するか（使�
 var webclap_Text = 'web拍手する';	// 拍手リンクのテキスト
 var webclap_Image_URL = './test.png';	//拍手ボタンの代わりに使う画像のURL
 var webclap_Image_URL_after = './test2.png';	// 拍手ボタンが押されたら画像を変えたい場合は、その画像のURL（ない場合は未入力のまま）
-var webclap_Image_width = 100;	// 拍手ボタン画像の横幅（px）
-var webclap_Image_height = 100;	// 拍手ボタン画像の高さ（px）
+var webclap_Image_width = 160;	// 拍手ボタン画像の横幅（px）
+var webclap_Image_height = 240;	// 拍手ボタン画像の高さ（px）
 
 var balloon_closetime = 0;	// 拍手を自動で閉じるまでの時間（秒）、0なら自動で閉じない（※未実装）
 // --------------------設定項目ここまで------------------------
@@ -82,8 +82,10 @@ webclap_iframe.id="wc_iframe";
 // BODY のノードリストに登録する
 document.body.appendChild(webclap_iframe);
 webclap_iframe.src = webclap_URL;
-document.getElementById('wc_iframe').style.visibility = "hidden";
-document.body.removeChild(webclap_iframe);
+webclap_iframe.style.visibility = "hidden";
+webclap_iframe.onload = function(){
+	document.body.removeChild(webclap_iframe);
+}
 // 拍手ページの読み込み終了
 
 // 拍手後のバルーンを生成する
@@ -103,7 +105,7 @@ balloon_elm.innerHTML = webclap_thxText;
 if(webclap_thxImage_URL) {
 	balloon_elm.innerHTML += '<br><div id="' + wc_id + '_thxImage"><a href="javascript:void(0);" onClick="javascript:disp_thxImage(this); false;">お礼画像を表示する</a></div>';
 }
-	balloon_elm.innerHTML += '<br><div><a href="javascript:void(0);" onClick="javascript:close_thxText('+wc_id+'); false;">バルーンを閉じる</a></div>';
+balloon_elm.innerHTML += '<br><div><a href="javascript:void(0);" onClick="javascript:close_thxText('+wc_id+'); false;">バルーンを閉じる</a></div>';
 }
 // ------------------バルーンを閉じる-------------------
 function close_thxText(element) {
@@ -130,8 +132,8 @@ Proin varius eros et metus porttitor auctor. Suspendisse vestibulum tempus ligul
 
 Maecenas nec nulla eu ipsum facilisis egestas. Maecenas at luctus dui, a condimentum tortor. In vulputate quam vitae rutrum auctor. Curabitur felis risus, scelerisque vitae felis a, sollicitudin volutpat dolor. In hac habitasse platea dictumst. Suspendisse vitae viverra ante, vel euismod quam. Nam eget purus sem. Donec et pretium sapien.</p>
 
-<div class="notrans_wc" id="hoge_1"></div>
-<div class="notrans_wc" id="wc_test_2"></div>
+<div class="notrans_wc" id="wc_test1"></div>
+
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris mattis, lectus quis vulputate tempor, libero justo tempor lorem, vitae viverra diam eros nec velit. Nulla sed diam viverra, sodales diam at, viverra enim. Donec ullamcorper maximus ipsum sit amet tempus. Aliquam ut velit vel neque scelerisque consequat id et ligula. Etiam vitae ipsum at leo vehicula congue vel nec lorem. Nunc at egestas metus. Integer et eros vitae tortor congue maximus non ut risus. Aenean quis imperdiet arcu, nec efficitur ante.
 
